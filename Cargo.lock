@@ -379,6 +379,12 @@ dependencies = [
 
 [[package]]
 name = "bs58"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "476e9cd489f9e121e02ffa6014a8ef220ecb15c05ed23fc34cca13925dc283fb"
+
+[[package]]
+name = "bs58"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "771fe0050b883fcc3ea2359b1a96bcfbc090b7116eae7c3c512c7a083fdf23d3"
@@ -1344,6 +1350,7 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
 name = "rust-airdrop"
 version = "0.1.0"
 dependencies = [
+ "bs58 0.3.1",
  "solana-sdk",
 ]
 
@@ -1517,7 +1524,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f0c52f25d28a1b5af57d5de3802e49883f68792a343101a9daf9817d8dfffff"
 dependencies = [
  "block-buffer 0.10.4",
- "bs58",
+ "bs58 0.4.0",
  "bv",
  "either",
  "generic-array",
@@ -1575,7 +1582,7 @@ dependencies = [
  "borsh 0.10.3",
  "borsh 0.9.3",
  "borsh 1.5.1",
- "bs58",
+ "bs58 0.4.0",
  "bv",
  "bytemuck",
  "cc",
@@ -1624,7 +1631,7 @@ dependencies = [
  "bincode",
  "bitflags",
  "borsh 1.5.1",
- "bs58",
+ "bs58 0.4.0",
  "bytemuck",
  "byteorder",
  "chrono",
@@ -1674,7 +1681,7 @@ version = "1.18.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c2ac8d7ef471476164edb2ed105bcf26071835a15f0e74703929d4ec913676b"
 dependencies = [
- "bs58",
+ "bs58 0.4.0",
  "proc-macro2",
  "quote",
  "rustversion",
