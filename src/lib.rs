@@ -1,11 +1,14 @@
+mod programs;
+
 #[cfg(test)]
 mod tests {
     use solana_client::rpc_client::RpcClient;
-    use solana_program::system_instruction::transfer;
-    use solana_sdk::{message::Message, transaction::Transaction, signature::{Keypair, Signer, read_keypair_file}, pubkey::Pubkey};
+    use solana_program::{system_instruction::transfer, system_program};
+    use solana_sdk::{message::Message, pubkey::Pubkey, signature::{self, read_keypair_file, Keypair, Signer}, transaction::Transaction};
     use bs58;
     use std::io::{self, BufRead};
     use std::str::FromStr;
+    use crate::programs::wba_prereq::WbaPrereqProgram;
 
     const RPC_URL: &str = "https://api.devnet.solana.com";
 
@@ -41,7 +44,7 @@ mod tests {
     #[test]
     fn airdrop(){
         // Import keypair
-        let keypair = read_keypair_file("wallets/dev-wallet.json").expect("Could't find wallet file");
+        let keypair = read_keypair_file("wallets/wba-wallet.json").expect("Could't find wallet file");
 
         // Connect to Solana Devnet RPC Client
         let client = RpcClient::new(RPC_URL);
@@ -86,6 +89,34 @@ mod tests {
         let signature = rpc_client.send_and_confirm_transaction(&txn).expect("Failed to send transaction");
 
         // Print transaction out
+        println!("Success! Check out your TX here: https://explorer.solana.com/tx/{}/?cluster=devnet", signature);
+    }
+
+    #[test]
+    fn enroll(){
+        use crate::programs::wba_prereq::{WbaPrereqProgram, CompleteArgs};
+
+        // Create Solana devnet connection
+        let rpc_client = RpcClient::new(RPC_URL);
+
+        // Define account
+        let signer = read_keypair_file("wallets/wba-wallet.json").expect("Couldn't find wallet file");
+
+        let prereq = WbaPrereqProgram::derive_program_address(&[b"prereq", signer.pubkey().to_bytes().as_ref()]);
+
+        // Define ix data
+        let args = CompleteArgs{
+            github: b"janinedotgm".to_vec()
+        };
+
+        // Get recent blockhash
+        let blockhash = rpc_client.get_latest_blockhash().expect("Failed to get recent blockhash");
+
+        // Invoke complete function
+        let txn = WbaPrereqProgram::complete(&[&signer.pubkey(), &prereq, &system_program::id()], &args, Some(&signer.pubkey()), &[&signer], blockhash);
+
+        let signature = rpc_client.send_and_confirm_transaction(&txn).expect("Failed to send transaction");
+
         println!("Success! Check out your TX here: https://explorer.solana.com/tx/{}/?cluster=devnet", signature);
     }
 }
