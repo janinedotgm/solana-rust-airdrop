@@ -2,7 +2,7 @@
 mod tests {
     use solana_client::rpc_client::RpcClient;
     use solana_program::system_instruction::transfer;
-    use solana_sdk::{transaction::Transaction, signature::{Keypair, Signer, read_keypair_file}, pubkey::Pubkey};
+    use solana_sdk::{message::Message, transaction::Transaction, signature::{Keypair, Signer, read_keypair_file}, pubkey::Pubkey};
     use bs58;
     use std::io::{self, BufRead};
     use std::str::FromStr;
@@ -62,16 +62,25 @@ mod tests {
         let keypair = read_keypair_file("wallets/dev-wallet.json").expect("Couldn't find wallet file");
 
         // Define WBA public key
-        let to_pubkey = Pubkey::from_str("5ZLGdjHANjs5Y6U831AnR5PBGWyaDrUjPJKDsGmAB3vn").unwrap();
+        let to_pubkey = Pubkey::from_str("<Your Public Key>").unwrap();
 
         // Create connection to Solana devnet
         let rpc_client = RpcClient::new(RPC_URL);
 
+        // Get balance of dev wallet
+        let balance = rpc_client.get_balance(&keypair.pubkey()).expect("Failed to get balance");
+
         // Get recent blockhash
         let recent_blockhash = rpc_client.get_latest_blockhash().expect("Failed to get recent blockhash");
 
+        // Create a test txn to calculate fees
+        let message = Message::new_with_blockhash(&[transfer(&keypair.pubkey(), &to_pubkey, balance)], Some(&keypair.pubkey()), &recent_blockhash);
+
+        // Calculate exact fee rate to transfer entire SOL amount out of acount minus fees
+        let fee = rpc_client.get_fee_for_message(&message).expect("Failed to get fee for message");
+
         // Create transaction
-        let txn = Transaction::new_signed_with_payer(&[transfer(&keypair.pubkey(), &to_pubkey, 1_000_000)], Some(&keypair.pubkey()), &vec![&keypair], recent_blockhash);
+        let txn = Transaction::new_signed_with_payer(&[transfer(&keypair.pubkey(), &to_pubkey, balance - fee)], Some(&keypair.pubkey()), &vec![&keypair], recent_blockhash);
 
         // Send transaction
         let signature = rpc_client.send_and_confirm_transaction(&txn).expect("Failed to send transaction");
